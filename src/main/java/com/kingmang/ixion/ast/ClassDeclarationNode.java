@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("DataFlowIssue")
 public class ClassDeclarationNode implements Node {
 
 	private final Token name;
@@ -69,7 +70,8 @@ public class ClassDeclarationNode implements Node {
 		IxType prevSuperClass = context.getCurrentSuperClass();
 		context.setCurrentSuperClass(getSuperclassType(context));
 
-		ClassWriter writer = initClass(getSuperclassType(context).getInternalName(), getInterfaceType(context).getInternalName(), context);
+		String interfaceName = getInterfaceType(context) != null ? getInterfaceType(context).getInternalName() : "";
+		ClassWriter writer = initClass(getSuperclassType(context).getInternalName(), interfaceName, context);
 
 		MethodVisitor defaultConstructor = null;
 		if(constructors.isEmpty()) {
@@ -133,7 +135,8 @@ public class ClassDeclarationNode implements Node {
 		IxType prevSuperClass = context.getCurrentSuperClass();
 		context.setCurrentSuperClass(getSuperclassType(context));
 
-		ClassWriter writer = initClass(getSuperclassType(context).getInternalName(), getInterfaceType(context).getInternalName(), context);
+		String interfaceName = getInterfaceType(context) != null ? getInterfaceType(context).getInternalName() : "";
+		ClassWriter writer = initClass(getSuperclassType(context).getInternalName(), interfaceName, context);
 
 		MethodVisitor defaultConstructor = null;
 
@@ -208,8 +211,10 @@ public class ClassDeclarationNode implements Node {
 
 		ClassWriter writer = new CustomClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, context.getLoader());
 
-
 		String[] interfaceNames = {interfaze};
+		if (interfaze.isEmpty()) {
+			interfaceNames = new String[]{};
+		}
 
 		if (!isFinal) {
 			writer.visit(
